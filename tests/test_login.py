@@ -1,64 +1,97 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
+from pages.login_page import LoginPage
 
-def setup_driver():
-    driver = webdriver.Chrome()
-    driver.maximize_window()
-    return driver
-
-def test_login_success():
-    driver = setup_driver()
-    wait = WebDriverWait(driver, 15)
+def test_login_success(driver):
+    wait = WebDriverWait(driver, 20)
 
     try:
-        driver.get("https://opensource-demo.orangehrmlive.com/")
+        driver.get("https://www.saucedemo.com/")
+
+        print("Current URL:", driver.current_url)
+        print("Page title:", driver.title)
 
         username = wait.until(
-            EC.visibility_of_element_located((By.NAME, "username"))
+            EC.visibility_of_element_located(LoginPage.username_input)
         )
         password = wait.until(
-            EC.visibility_of_element_located((By.NAME, "password"))
+            EC.visibility_of_element_located(LoginPage.password_input)
         )
+        login_button = wait.until(
+            EC.element_to_be_clickable(LoginPage.login_button)
+        )
+        username.send_keys("standard_user")
+        password.send_keys("secret_sauce")
+        login_button.click()
 
-        username.send_keys("Admin")
-        password.send_keys("admin123")
-        password.send_keys(Keys.RETURN)
+        wait.until(EC.url_contains("inventory"))
+        assert "inventory" in driver.current_url.lower()
 
-        wait.until(EC.url_contains("dashboard"))
+    except TimeoutException:
+        print("DEBUG URL:", driver.current_url)
+        print("DEBUG TITLE:", driver.title)
+        driver.save_screenshot("login_debug_success.png")
+        raise
 
-        assert "dashboard" in driver.current_url.lower()
-        print("✅ Positive Login Test Passed")
-    finally:
-        driver.quit()
-
-def test_login_invalid_password():
-    driver = setup_driver()
-    wait = WebDriverWait(driver, 15)
+def test_login_invalid_password(driver):
+    wait = WebDriverWait(driver, 20)
 
     try:
-        driver.get("https://opensource-demo.orangehrmlive.com/")
+        driver.get("https://www.saucedemo.com/")
+
+        print("Current URL:", driver.current_url)
+        print("Page title:", driver.title)
+
+        login_page = LoginPage(driver)
+        login_page.login("standard_user", "wrongpassword")
+
+        error = login_page.get_error_message()
+        assert "epic sadface" in error.lower()
+
         
+
+    except TimeoutException:
+        print("DEBUG URL:", driver.current_url)
+        print("DEBUG TITLE:", driver.title)
+        driver.save_screenshot("login_debug_invalid.png")
+        raise
+
+def test_login_locked_user(driver):
+    wait = WebDriverWait(driver, 20)
+
+    try:
+        driver.get("https://www.saucedemo.com/")
+
+        print("Current URL:", driver.current_url)
+        print("Page title:", driver.title)
+
         username = wait.until(
-            EC.visibility_of_element_located((By.NAME, "username"))
+            EC.visibility_of_element_located(LoginPage.username_input)
         )
         password = wait.until(
-            EC.visibility_of_element_located((By.NAME, "password"))
+            EC.visibility_of_element_located(LoginPage.password_input)
         )
-        
-        username.send_keys("Admin")
-        password.send_keys("wrongpassword")
-        password.send_keys(Keys.RETURN)
-        error_message = wait.until(
-            EC.visibility_of_element_located((By.CLASS_NAME, "oxd-alert-content-text"))
+        login_button = wait.until(
+            EC.element_to_be_clickable(LoginPage.login_button)
         )
+
+        username.send_keys("locked_out_user")
+        password.send_keys("secret_sauce")
+        login_button.click()
+
+        error = wait.until(
+            EC.visibility_of_element_located(LoginPage.error_message)
+        )
+
+        assert "locked out" in error.text.lower()
+
+    except TimeoutException:
+        print("DEBUG URL:", driver.current_url)
+        print("DEBUG TITLE:", driver.title)
+        driver.save_screenshot("login_debug_locked.png")
+        raise
+    
+
         
-
-        assert "invalid" in error_message.text.lower()
-        print("✅ Negative Login Test Passed")
-
-    finally:
-        driver.quit()
-
+        
