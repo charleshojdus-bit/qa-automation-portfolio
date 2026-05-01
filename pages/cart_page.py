@@ -8,6 +8,20 @@ class CartPage:
 
     def __init__(self, driver):
         self.driver = driver
+        self.wait = WebDriverWait(driver, 20)
+    
+    def _get_visible_elements(self, locator):
+        return self.wait.until(
+            EC.visibility_of_all_elements_located(locator)
+        )
+    
+    def _click(self, locator):
+        element = self.wait.until(
+            EC.element_to_be_clickable(locator)
+        )
+        self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
+        self.driver.execute_script("arguments[0].click();", element)
+        
 
     def is_item_in_cart(self, item_name):
         items = self.driver.find_elements(*self.cart_item_names)
@@ -19,20 +33,16 @@ class CartPage:
         return False
     
     def remove_item(self):
-        remove_btn = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(self.remove_button)
-    )
+        self._click(self.remove_button)
 
-        self.driver.execute_script("arguments[0].scrollIntoView(true);", remove_btn)
-        self.driver.execute_script("arguments[0].click();", remove_btn)
-
-        WebDriverWait(self.driver, 10).until(
-            lambda d: len(d.find_elements(*self.cart_item_names)) == 0
-    )
+        self.wait.until(
+            lambda d: len(d.find_elements(*self.remove_button)) == 0
+        )
         
             
         
     def is_cart_empty(self):
-        items = self.driver.find_elements(*self.cart_item_names)
-        return len(items) == 0
-        
+        self.wait.until(
+            lambda d: len(d.find_elements(*self.cart_item_names)) == 0
+        )
+        return True
