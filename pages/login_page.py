@@ -17,6 +17,18 @@ class LoginPage:
     def open(self):
         self.driver.get(self.URL)
 
+    def _get_visible_element(self, locator):
+        return self.wait.until(
+            EC.visibility_of_element_located(locator)
+        )
+    
+    def _click(self, locator):
+        element = self.wait.until(
+            EC.element_to_be_clickable(locator)
+        )
+        self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
+        element.click()
+
     def enter_username(self, username):
         field = self._get_visible_element(self.username_input) 
         field.clear()
@@ -27,21 +39,8 @@ class LoginPage:
         field.clear()
         field.send_keys(password)
 
-    def _click(self, locator):
-        element = self.wait.until(
-        EC.element_to_be_clickable(locator)
-    )
-        self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
-        element.click()
-
-
     def click_login(self):
         self._click(self.login_button)
-
-    def _get_visible_element(self, locator):
-        return self.wait.until(
-            EC.visibility_of_element_located(locator)
-        )
 
     def login(self, username, password):
         self.enter_username(username)
@@ -49,19 +48,18 @@ class LoginPage:
         self.click_login()
 
     def get_error_message(self):
-        error = self.wait.until(
-            EC.visibility_of_element_located(self.error_message)
-        )
+        error = self._get_visible_element(self.error_message)
         return error.text
+           
+    def is_error_displayed(self):
+        return self._get_visible_element(self.error_message).is_displayed()
     
     def is_on_inventory_page(self):
         return "inventory" in self.driver.current_url.lower()
     
-    def get_error_text(self):
-        return self.driver.find_element(*self.error_message).text.lower()
     
-    def is_error_displayed(self):
-        return self.driver.find_element(*self.error_message).is_displayed()
+    
+    
 
 
 
