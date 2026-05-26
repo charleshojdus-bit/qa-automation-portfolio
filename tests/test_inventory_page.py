@@ -42,3 +42,14 @@ def test_add_item_to_cart(driver):
         driver.save_screenshot("add_to_cart_debug.png")
         raise
 
+def test_add_backpack_to_cart_updates_cart_badge(driver):
+        login_page = LoginPage(driver)
+        inventory_page = InventoryPage(driver)
+
+        login_page.open()
+        login_page.login("standard_user", "secret_sauce")
+
+        inventory_page.add_backpack_to_cart()
+
+        assert inventory_page.get_cart_count() == "1"
+
