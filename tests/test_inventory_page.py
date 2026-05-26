@@ -38,7 +38,7 @@ def test_add_item_to_cart(driver):
 
     except (TimeoutException, AssertionError):
         print("DEBUG URL:", driver.current_url)
-        print(" DEBUG TITLE:", driver.title)
+        print("DEBUG TITLE:", driver.title)
         driver.save_screenshot("add_to_cart_debug.png")
         raise
 
