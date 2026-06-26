@@ -80,4 +80,3 @@ class CheckoutPage:
 
     def get_confirmation_message(self):
         return self._get_visible_element(self.confirmation_message).text
-    
