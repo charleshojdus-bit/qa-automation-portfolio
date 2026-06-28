@@ -1,5 +1,7 @@
 # QA Automation Portfolio
 
+![Tests](https://github.com/charleshojdus-bit/qa-automation-portfolio/actions/workflows/tests.yml/badge.svg)
+
 This project demonstrates a Python-based QA automation framework using Selenium WebDriver and Pytest. It is designed to showcase clean test design, maintainability, and real-world UI testing scenarios.
 
 ---
